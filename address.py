@@ -1,8 +1,10 @@
 from ecdsa import SigningKey, curves
 from binascii import a2b_hex, b2a_hex, a2b_uu, b2a_uu
 import hashlib
-BASE_58_ENCODING = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
+import requests
 
+BASE_58_ENCODING = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
+SECP256K1_MAX = 2**256 - 2**32 - 2**9 - 2**8 - 2**7 - 2**6 - 2**4 - 1
 def base58encode(input):
     input_int = int(b2a_hex(input),16)
     output = ''
@@ -83,13 +85,29 @@ def wif_to_private(wif):
 def get_vanity(search):
     while True:
         address = generate_random_private_key()
+        print address
         if address['address'][:len(search)] == search:
             print 'Found match in {} tries'.format(i)
-            print address
             return
+            
+def check_block_chain(address):
+    url = 'http://blockchain.info/address/{}?format=json'.format(address)
+    response = requests.get(url).json()
+    return response
 
-private_hex = hashlib.sha256('test').digest()
-print b2a_hex(private_hex)
-print private_to_address(private_hex)
+# private_hex = hashlib.sha256('test').digest()
+# print b2a_hex(private_hex)
+# print private_to_address(private_hex)
 
-get_vanity('1btc')
+# get_vanity('1btc')
+
+# import random
+# seed = random.randint(1,SECP256K1_MAX-1)
+# while True:
+    # private_hex = hex(seed)[2:-1]
+    # print 'Private:', private_hex
+    # address = private_to_address(a2b_hex(private_hex))
+    # print 'Public:', address
+    # print 'Total received:', check_block_chain(address)['total_received']
+    # seed += 1
+    
